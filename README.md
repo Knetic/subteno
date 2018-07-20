@@ -24,7 +24,7 @@ sudo platformio run --target upload; sudo platformio run --target monitor
 How do I use it?
 ====
 
-Clone the project, substitute your own SSID/password in `main.cpp`, plug in your 8266, build/upload the project, and from that moment on your 8266 will keep your server online.
+Clone the project, substitute your own SSID/password/IP/MAC in `globals.cpp`, plug in your 8266, build/upload the project, and from that moment on your 8266 will keep your server online.
 
 Where's the Fritz?
 ====

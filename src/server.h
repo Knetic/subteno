@@ -7,8 +7,4 @@ extern ESP8266WebServer webserver;
 
 void setupWebserver();
 
-extern char* targetMAC;
-extern char* targetIP;
-extern unsigned long packetFrequency;
-
 #endif

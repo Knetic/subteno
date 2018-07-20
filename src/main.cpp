@@ -4,12 +4,7 @@
 #include <ESP8266mDNS.h>
 #include <string.h>
 #include "server.h"
-
-const int BAUD = 9600;
-const char* ssid = "";
-const char* password = "";
-
-const int WOL_PORT = 9;
+#include "globals.h"
 
 MDNSResponder mdns;
 WiFiUDP udp;
@@ -18,8 +13,6 @@ static void setupWifi();
 static void sendPacket();
 static unsigned char* createPacket(const char* address);
 static void blink(int count, int interval);
-
-unsigned long lastPacket;
 
 void setup()
 {
@@ -44,12 +37,12 @@ void loop()
         webserver.handleClient();
 
         current = millis();
-        diff = current - lastPacket;
+        diff = current - lastPacketTime;
 
         if(diff >= packetFrequency)
         {
                 sendPacket();
-                lastPacket = current;
+                lastPacketTime = current;
         }
 }
 

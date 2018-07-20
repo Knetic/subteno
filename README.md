@@ -24,9 +24,14 @@ sudo platformio run --target upload; sudo platformio run --target monitor
 How do I use it?
 ====
 
-Clone the project, substitute your own SSID/password/IP/MAC in `globals.cpp`, plug in your 8266, build/upload the project, and from that moment on your 8266 will keep your server online.
+Clone the project, substitute your own SSID/password/MAC in `globals.cpp`, plug in your 8266, build/upload the project, and from that moment on your 8266 will keep your server online.
 
 Where's the Fritz?
 ====
 
 Fritz diagrams are used to express how components and microcontrollers ought to be wired together. In this case, there's no components other than the esp8266 - it's a purely software project.
+
+Other projects used
+====
+
+[wol.c](https://github.com/scratch-org/wol.c/): for copy/pasted code to translate an ASCII hex MAC address to a proper 48-bit representation. There was no license for the project, so I took the code verbatim.

@@ -14,6 +14,9 @@ static void sendPacket();
 static unsigned char* createPacket(const char* address);
 static void blink(int count, int interval);
 
+static size_t get_hex_from_string(const char *buf, size_t buflen, unsigned *hex);
+static int get_ether(const char *hardware_addr, unsigned char *dest);
+
 void setup()
 {
 	pinMode(LED_BUILTIN, OUTPUT);
@@ -89,15 +92,20 @@ static void sendPacket()
 
 static unsigned char* createPacket(const char* address)
 {
-        unsigned char *message = (unsigned char*)malloc(sizeof(unsigned char) * 102);
-        unsigned char *message_ptr = message;
+        unsigned char* message = (unsigned char*)malloc(sizeof(unsigned char) * 102);
+        unsigned char* message_ptr = message;
+        unsigned char* mac = (unsigned char*)malloc(sizeof(unsigned char) * 6);
 
+        get_ether(address, mac);
+
+        // six 0xFF's
         memset(message_ptr, 0xFF, 6);
 	message_ptr += 6;
 
+        // followed by 16 repetitions of the 48-bit (6-byte) MAC of the target
 	for (int i = 0; i < 16; i++) 
         {
-		memcpy(message_ptr, address, 6);
+		memcpy(message_ptr, mac, 6);
 		message_ptr += 6;
 	}
 
@@ -113,4 +121,50 @@ static void blink(int count, int interval)
 		digitalWrite(LED_BUILTIN, HIGH);
 		delay(interval);
 	}
+}
+
+// ref: https://github.com/scratch-org/wol.c/
+static size_t get_hex_from_string(const char *buf, size_t buflen, unsigned *hex)
+{
+	size_t i;
+
+	*hex = 0;
+	for (i = 0; i < buflen && buf[i] != '\0'; ++i) {
+		*hex <<= 4;
+		if (isdigit(buf[i])) {
+			*hex |= buf[i] - '0';
+		} else if (buf[i] >= 'a' && buf[i] <= 'f') {
+			*hex |= buf[i] - 'a' + 10;
+		} else if (buf[i] >= 'A' && buf[i] <= 'F') {
+			*hex |= buf[i] - 'A' + 10;
+		} else {
+			return 0; /* Error */
+		}
+	}
+	return i;
+}
+
+// ref: https://github.com/scratch-org/wol.c/
+static int get_ether(const char *hardware_addr, unsigned char *dest)
+{
+	const char *orig = hardware_addr;
+	size_t i;
+
+	for (i = 0; *hardware_addr != '\0' && i < 6; ++i) {
+		/* Parse two characters at a time. */
+		unsigned hex;
+		size_t chars_read = get_hex_from_string(hardware_addr, 2, &hex);
+		if (chars_read == 0) {
+			return -1;
+		} else {
+			hardware_addr += chars_read;
+		}
+
+		*dest++ = (unsigned char)(hex & 0xFF);
+
+		/* We might get a colon here, but it is not required. */
+		if (*hardware_addr == ':') ++hardware_addr;
+	}
+
+	return (hardware_addr - orig == 17) ? 0 : -1;
 }
